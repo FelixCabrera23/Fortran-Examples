@@ -7,9 +7,9 @@
 ! Codificación del texto: ASCII text
 ! Compiladores probados: GNU Fortran (Ubuntu 9.2.1-9ubuntu2) 9.2.1 2019008
 ! Instrucciones de compilación: no requiere nada más
-! mpifort -Wall -pedantic -std=f95 -c -o holaMundoP.o holaMundoP.f90
+! mpifort -Wall -pedantic -std=f95 -c -o MontyP.o MontyP.f90
 ! mpifort -o MontyP.x MontyP.o
-! mpirun -np 2 ./holaMundoP.x
+! mpirun -np 2 ./MontyP.x
 
 ! Notese que en la ultima instrucción el numero depede de la cantidad 
 ! de procesadores fisicos que disponga el sistema.
@@ -27,15 +27,15 @@ PROGRAM Monty_Paralelo
   INTEGER :: Puerta, Eleccion
   !Variables necesarias para la estadistica
   INTEGER :: Gana_p, Gana_c,Total_p,Total_c
-  REAL :: Prob_p, Prob_c
+  REAL(4) :: Prob_p, Prob_c
   
   INTEGER, DIMENSION (33) :: semilla
   
   !Variables auxiliares
-  REAL :: p1,p2
-  INTEGER :: i,n,m, emisor
+  REAL(4) :: p1,p2,m 
+  INTEGER(8) :: i,n
   !Variables auxiliares para Mpi
-  INTEGER :: err, rank, size
+  INTEGER :: err, rank, size, emisor
 
   !Esta parte llama a Mpi
   ! iniciando MPI, esto habilita el entorno de trabajo
@@ -49,17 +49,20 @@ PROGRAM Monty_Paralelo
 
   CALL MPI_Comm_size(MPI_COMM_WORLD,size,err) ! dice cuántos nodos hay
   IF (err.NE.0) STOP 'MPI_Comm_size error' ! esto es programación defensiva
-  m = 100
-  n = m/size
+  
+  ! inicializando variables
+  
+  n = 1000000000 !Esta es la cantidad de iteraciones que hara cada nucleo, el maximo es 1000000000
+  
+  m = n*size
+  
   semilla = 07052019 + (rank*7)
 
   CALL RANDOM_SEED (put = semilla)
   
-  ! inicializando variables
+  
   Gana_c = 0
   Gana_p = 0
-!  Total_c = 0
-!  Total_p = 0
   
   DO i=1,n
     !Esta parte simula la elección de la puerta correcta
@@ -81,9 +84,9 @@ PROGRAM Monty_Paralelo
     ENDIF 
   ENDDO
 
-  PRINT *, 'semilla:', semilla (1)
-  PRINT *, 'soy ', rank, 'cantidad de juegos ganados p', Gana_p 
-  PRINT *, 'soy ', rank, 'cantidad de juegos ganados c', Gana_c
+  PRINT *, 'soy ', rank,'semilla:', semilla (1)
+  PRINT *, 'cantidad de juegos ganados p', Gana_p 
+  PRINT *, 'cantidad de juegos ganados c', Gana_c
 
 ! Resivimos los calculos que hacen los otros nucleos
 
@@ -105,10 +108,10 @@ PROGRAM Monty_Paralelo
   IF ( rank == 0 ) THEN
     
     PRINT *, 'Numero de iteraciones: ',m
-    PRINT *, 'Juegos ganados totales p: ', Total_p
-    PRINT *, 'Juegos ganados totales c: ', Total_c
-    Prob_p = (Total_p/(m/100))
-    Prob_c = (Total_c/(m/100))
+!    PRINT *, 'Juegos ganados totales p: ', Total_p
+!    PRINT *, 'Juegos ganados totales c: ', Total_c
+    Prob_p = (Total_p/(m/100.0))
+    Prob_c = (Total_c/(m/100.0))
   
     PRINT *, 'La probabilidad de ganar si no se cambia es de: ', Prob_p,'%'
     PRINT *, 'La probabilidad de ganar si se cambia es de: ', Prob_c, '%'

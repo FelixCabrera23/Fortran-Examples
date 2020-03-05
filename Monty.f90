@@ -7,7 +7,7 @@
 ! Codificación del texto: ASCII text
 ! Compiladores probados: GNU Fortran (Ubuntu 9.2.1-9ubuntu2) 9.2.1 2019008
 ! Instrucciones de compilación: no requiere nada más
-! gfortran -Wall -pedantic -std=f95 Monty.f90-o Monty
+! gfortran -Wall -pedantic -std=f95 Monty.f90 -o Monty
 ! ./Monty
 
 PROGRAM Monty
@@ -18,15 +18,16 @@ PROGRAM Monty
   INTEGER :: Puerta, Eleccion
   !Variables necesarias para la estadistica
   INTEGER :: Gana_p, Gana_c
-  REAL :: Prob_p, Prob_c
+  REAL(4) :: Prob_p, Prob_c
   
   INTEGER, DIMENSION (33) :: semilla
   
   !Variables auxiliares
-  REAL :: p1,p2
-  INTEGER :: i,n
+  REAL(4) :: p1,p2
+  INTEGER(8) :: i,n
   
-  n = 10000000
+  n = 1000000000
+  
   semilla = 07052019
 
   CALL RANDOM_SEED (put = semilla)
@@ -56,9 +57,9 @@ PROGRAM Monty
   ENDDO
   
   !Calculando la probabilidad
-  Prob_p = (Gana_p/(n/100))
-  Prob_c = (Gana_c/(n/100))
-  
+  Prob_p = (Gana_p/(REAL(n)/100.0))
+  Prob_c = (Gana_c/(REAL(n)/100.0))
+  PRINT *, 'Numero de iteraciones: ', n
   PRINT *, 'La probabilidad de ganar si no se cambia es de: ', Prob_p,'%'
   PRINT *, 'La probabilidad de ganar si se cambia es de: ', Prob_c, '%'
   
