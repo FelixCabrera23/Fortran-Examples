@@ -25,10 +25,9 @@ PROGRAM primos
   ! iniciamos nuestras variables
   ! para hacer en orden ascendente l = 1,
   ! para hacerlos en orden descendente l = n
-  n = 47
-  m = n
+  n = 10
   o = 0
-  l = 1 ! Ascendente
+  l = 2 ! Ascendente
   !l = n ! Descendente
   
   ! Al principio no conocemos cuantos primos hay,
@@ -38,6 +37,7 @@ PROGRAM primos
   
   DO j = 1, (n)
     primo = .true.
+    m = l
     DO i = 1, (l-2)
       m = m - 1
       k = MOD(l,m)
@@ -51,7 +51,7 @@ PROGRAM primos
     END IF
     l = l + 1  !ascendente
     !l = l - 1 !descendente
-    m = l
+    
   END DO
  
   ! Esta variable aqui ya sabe cuantos numeros primos hay
