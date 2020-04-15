@@ -19,68 +19,53 @@ PROGRAM buffon
   
   ! Declaramos algunas variables importatnes
   INTEGER(8) :: n, A
-  REAL(8) :: o, x0, x1, pi1, pi2
+  REAL(8) :: x, ang, pi1
   
   ! Variables auxiliares
-  INTEGER, DIMENSION(33) :: sem, s1, s2, s3
-  INTEGER(8) :: m, i, j, exp2
-  REAL (8) :: r1, r2, r3, suma, exp1, x
- 
+  INTEGER, DIMENSION(33) :: sem
+  INTEGER(8) :: i, mod1, m
+  REAL (8) :: x1
+  
   ! Iniciamos algunas variables 
   sem = 7052019
   
   CALL RANDOM_SEED (put = sem)
    
-  n = 40
-  m = 1
+  n = 1000000000
+  m = 100
   x = 0
-  o = 0
-  suma = 0
-    
-  DO i = 1, m
-    pi1 = 0
-    A = 0
-    DO j= 1, n
-      ! Generamos 2 semillas independientes
-      CALL RANDOM_NUMBER (r1) 
-      s1 = INT(r1*10000)
-    
-      CALL RANDOM_NUMBER (r2)
-      s2 = INT(r2*10000)
-      
-      CALL RANDOM_NUMBER (r3)
-      s3 = INT(r3*10000)   
-      ! Las usamos para generar dos numeros aleatorios independientes
-      CALL RANDOM_SEED (put = s1)
-      CALL RANDOM_NUMBER (x) 
-    
-      CALL RANDOM_SEED (put = s2)
-      CALL RANDOM_NUMBER (o)     
-      
-      CALL RANDOM_SEED (put = s3)
-      CALL RANDOM_NUMBER (exp1)
-      
-      exp2 = int(exp1*2)
-      ! Hacemos uso de los numeros
-      x0 = 2*o ! punto del origen de la aguja
-      x1 = x0+(x*((-1)**exp2)) ! punto del final de la aguja
-      IF ((x1 <= 0) .or. (x1 >=2)) THEN
-        A = A + 1
-      ELSE IF ((x0 <= 1) .and. (x1 >= 1)) THEN
-        A = A + 1
-      ELSE IF ((x0 >= 1) .and. (x1 <=1)) THEN
-        A = A + 1
-!~       IF ((x1 <= 0) .or. (x1 >= 1)) THEN
-!~         A = A + 1
-      END IF
-    END DO
-    ! Calculamos pi
+  pi1 = 0
+  A = 1
   
-    pi1 = (2*REAL(n))/(REAL(A))
-    suma = suma + pi1
+  OPEN (1, file = 'Buffon.dat', status = 'new')
+  WRITE (1,*) '# Resultados de la simulación de la aguja de buffon'
+  WRITE (1,*) 'n pi'
+
+  DO i= 1, n
+  
+    CALL RANDOM_NUMBER (x) 
+    
+    CALL RANDOM_NUMBER (ang)     
+      
+    ! Hacemos uso de los numeros
+    x1 = x + SIN(ang*6.28318530718) ! punto del final de la aguja
+    
+    IF ((x1 <= 0) .or. (x1 >=1)) THEN
+      A = A + 1
+    END IF
+
+  ! Calculamos pi
+  
+    pi1 = (2*REAL(i))/(REAL(A))
+    
+    mod1 = mod(i,m)
+        
+    IF ((i == 1) .or. (mod1 == 0)) THEN
+      WRITE (1,*) i, pi1
+    END IF
+    
   END DO
-  
-  pi2 = suma/real(m)
-  print *,'pi = ',pi2
+  PRINT *, 'n =', n
+  PRINT *,'pi =', pi1
   
 END PROGRAM buffon
