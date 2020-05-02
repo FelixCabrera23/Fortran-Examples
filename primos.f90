@@ -10,6 +10,9 @@
 ! gfortran -Wall -pedantic -std=f95 primos.f90 -o primos
 ! ./primos
 
+! para su caracterización
+! /usr/bin/time -f "%e, %M, %P," ./primos
+
 
 PROGRAM primos
   IMPLICIT NONE
@@ -17,7 +20,7 @@ PROGRAM primos
   INTEGER (8) :: i, j, k, l, n, m, o
   
   ! Variables de las listas de numeros primos
-  INTEGER(8), ALLOCATABLE:: primos1(:),primos2(:)
+  INTEGER(8), ALLOCATABLE:: primos1(:)
   
   ! Esta variables nos ayuda a sabe si un numero es primo o no
   LOGICAL :: primo
@@ -25,10 +28,12 @@ PROGRAM primos
   ! iniciamos nuestras variables
   ! para hacer en orden ascendente l = 1,
   ! para hacerlos en orden descendente l = n
-  n = 10
+  n = 500000
   o = 0
   l = 2 ! Ascendente
   !l = n ! Descendente
+  
+  PRINT *,'Procesando',n
   
   ! Al principio no conocemos cuantos primos hay,
   ! pero sabemos que no pueden ser más que n
@@ -37,13 +42,14 @@ PROGRAM primos
   
   DO j = 1, (n)
     primo = .true.
-    m = l
-    DO i = 1, (l-2)
-      m = m - 1
+    m = 2
+    DO WHILE (m<l)
       k = MOD(l,m)
       IF (k == 0) THEN
         primo = .false.
+        EXIT
       END IF
+      m = m + 1
     END DO
     IF (primo) THEN
       o = o + 1
@@ -55,13 +61,17 @@ PROGRAM primos
   END DO
  
   ! Esta variable aqui ya sabe cuantos numeros primos hay
-  ALLOCATE(primos2(o)) 
-  DO i = 1, (o)
-    primos2(i) = primos1(i)
-  END DO
-   
-  PRINT *, primos2
   
-  DEALLOCATE(primos1,primos2)
+  OPEN (1, file = 'primos_sec.dat', status = 'new')
+  WRITE (1,*) '# Numeros primos '
+  
+  DO i=1, (o)
+    WRITE (1,*) primos1(i)
+  END DO
+  
+  CLOSE(1)
+  DEALLOCATE(primos1)
+  
+  PRINT *,'Terminado'
   
 END PROGRAM primos

@@ -18,6 +18,9 @@
 ! mpifort -o primosP.x primosP.o
 ! mpirun -np 2 ./primosP.x
 
+! Para caracterizar
+! /usr/bin/time -f "%e, %M, %P," mpirun -np 2 ./primosP.x
+
 
 PROGRAM primos_paralelo
   USE Mpi
@@ -60,7 +63,7 @@ PROGRAM primos_paralelo
   END IF
    
   ! Iniciamos las variables del calculo
-  n = 1000
+  n = 500000
   o = 0
   o1 = 1
   ! Iniciamos las variables para MPI
@@ -69,11 +72,9 @@ PROGRAM primos_paralelo
   res = MOD(n,m1)
   parte = n/m1
   
-  j = 0
   k = 0
   DO i=1, size
-    j = j + 1
-    k = k + j
+    k = k + i
   END DO
   ! Con esto definimos la cantidad de iteraciónes que hace 0  
   n1 = (k*parte)+res 
@@ -81,6 +82,7 @@ PROGRAM primos_paralelo
   ! Con esto asignamos los valores con los que realizaran la busqueda
   ! de numeros primos cada nucleo
   IF (rank == 0) THEN
+  PRINT *, 'Procesando', n
     n2 = n1
     l = 2
   ELSE
@@ -100,13 +102,14 @@ PROGRAM primos_paralelo
   
   DO j = 1, (n2)
     primo = .true.
-    m = l
-    DO i = 1, (l-2)
-      m = m - 1
+    m = 2
+    DO WHILE(m < l)
       k = MOD(l,m)
       IF (k == 0) THEN
         primo = .false.
+        EXIT
       END IF
+      m = m + 1
     END DO
     IF (primo) THEN
       o = o + 1
@@ -162,8 +165,17 @@ PROGRAM primos_paralelo
         primos3(contador_i) = primos2(j)     
       END DO
     END DO
-    PRINT *, primos3
+    
+    OPEN (1, file = 'primos_P.dat', status = 'new')
+    WRITE (1,*) '# Numeros primos '
+  
+    DO i=1, (contador_i)
+      WRITE (1,*) primos3(i)
+    END DO
+    CLOSE(1)
     DEALLOCATE(primos2,primos3)
+    
+    PRINT *,'Terminado'
   END IF
 
   ! terminando MPI, esto deshabilita el entorno de trabajo 
