@@ -81,7 +81,8 @@ PROGRAM goldbach_D
     DO WHILE (primo1<m)
       j = 1
       primo2 = 2
-      DO WHILE (primo2<m)
+      suma1 = primo1 + 2
+      DO WHILE (suma1<m)
         
         suma1 = primo1 + primo2
 
@@ -117,8 +118,9 @@ PROGRAM goldbach_D
   END DO
   ! Con estos quedan los datos para v2 y v3 guardados en el arreglo 
 
-  ! Ahora imprimimos los datos a un archivo
-  OPEN (1, file = 'goldbach_D.dat', status = 'new')
+  ! Ahora imprimimos los datos a un archivo status= 'new'
+  
+  OPEN (1, file = 'goldbach_D.dat')
   WRITE (1,*) '# Datos del programa que prueban la conjetura de goldbach hasta',n
   WRITE (1,*) 'N     V2     V3'
   

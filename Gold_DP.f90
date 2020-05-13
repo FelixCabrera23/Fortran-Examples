@@ -69,7 +69,7 @@ PROGRAM goldbach_paralelo
   
   
   ! Iniciamos las variables del calculo
-  n = 50000
+  n = 20000
   o = 0
   o1 = 1
   
@@ -183,7 +183,8 @@ PROGRAM goldbach_paralelo
     DO WHILE (primo1<m)
       j = 1
       primo2 = 2
-      DO WHILE (primo2<m)
+      suma1 = primo1 + 2
+      DO WHILE (suma1<m)
         
         suma1 = primo1 + primo2
 
@@ -263,11 +264,11 @@ PROGRAM goldbach_paralelo
   END IF
   
   ! Ahora imprimimos los datos a un archivo
-  ! Solamente el maestro
+  ! Solamente el maestro status = 'new'
   
   IF (rank == 0) THEN
   
-    OPEN (10, file = 'goldbach_par.dat', status = 'new')
+    OPEN (10, file = 'goldbach_par.dat')
     WRITE (10,*) '# Datos del programa que prueban la conjetura de goldbach hasta',n
     WRITE (10,*) 'N      V2      V3'
   
