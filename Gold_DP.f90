@@ -69,7 +69,7 @@ PROGRAM goldbach_paralelo
   
   
   ! Iniciamos las variables del calculo
-  n = 20000
+  n = 50000
   o = 0
   o1 = 1
   
@@ -80,6 +80,9 @@ PROGRAM goldbach_paralelo
   ! Al principio no conocemos cuantos primos hay,
   ! pero sabemos que no pueden ser más que n/2
   ! ya que podemos descartar todos los numeros pares
+ 
+ 
+  
   ALLOCATE(primos1(n/2+500))
   primos1 = 0
   primos1(1) = 2
@@ -117,6 +120,9 @@ PROGRAM goldbach_paralelo
   ! Ahora ya podemos empezar el proceso con paralelismo de datos
   ! Iniciamos las variables para MPI
   
+  ! La siguiente sección es para partir los datos en partes proporcionales 
+  ! al trabajo asignado
+  
   m1 = size**2  ! Este es el numero que dividira a n  
   res = MOD(n,m1)
   parte = n/m1
@@ -129,6 +135,8 @@ PROGRAM goldbach_paralelo
   END DO
   ! Con esto definimos la cantidad de iteraciónes que hace 0  
   n1 = (k*parte) + res
+
+
   
   ! Con esto asignamos la carga de datos para cada nucleo
   IF (rank == 0) THEN
@@ -142,13 +150,30 @@ PROGRAM goldbach_paralelo
       l = l - parte*(i)
     END DO
   END IF
+
+  ! La siguiente sección es para partir los datos en partes iguales.
+
+!~   parte = n/size
+!~   res = MOD(n,size)
+!~   n1 = n
+!~   IF (rank == 0) THEN
+!~     PRINT *, 'Procesando', n1
+!~     n2 = parte + res
+!~     l = 2
+!~   ELSE
+!~     n2 = parte
+!~     l = n + res
+!~     DO i=1, (size-rank)
+!~       l = l - parte
+!~     END DO
+!~   END IF
+
   
   ! Esta variable la necesitaremos para hacer goldbach
   ! Se toma aqui porque la l original se modifica más adelante
   l2 = l
   
   PRINT *, 'Soy', rank, 'procesando',l,'n=',n2
-    
   !Inicamos las variables necesarias
   ! Necesitamos un contador que sea par
   
@@ -214,7 +239,6 @@ PROGRAM goldbach_paralelo
     numeros(k)= m    
     sumasv2(k)= INT(v2)
     sumasv3(k)= INT(v3)
-    
     m = m + 2
   END DO
   
