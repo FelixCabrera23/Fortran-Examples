@@ -30,11 +30,10 @@ PROGRAM distros
   REAL (4) :: exp1, nor1, uni1
   
   ! Declaramos variables auxiliares
-  INTEGER (4) :: i, j, n
+  INTEGER (4) :: i, n
   REAL (4) :: delta
   INTEGER, DIMENSION(33) :: semilla
   REAL (4), ALLOCATABLE :: exp2(:), nor2(:), uni2(:)
-  REAL (4), ALLOCATABLE :: datos_par(:,:)
   
   !XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
   
@@ -59,13 +58,11 @@ PROGRAM distros
   !XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
   
   ! Determinamos la cantida de numeros que queremos generar
-  n = 50000000
-  j = 1
+  n = 1000
    
   ! iniciamos variables auxiliares
   delta = 3
-  ALLOCATE(datos_par(3,n+size))
-  datos_par = 0
+
   ! Separamos la tarea
   IF (rank == 0) THEN
     n1 = (n/size) + MOD(n,size)
@@ -75,6 +72,15 @@ PROGRAM distros
   END IF
   ALLOCATE(exp2(n1),nor2(n1),uni2(n1))
   PRINT *, 'rank=', rank, 'generando',n1,'números'
+  
+  IF (rank==0) THEN
+    ! Abrimos archivos donde se guardaran los datos
+    OPEN (5, file = 'ditribuciones_par.dat', status='new')
+    WRITE (5,*) '# Resultados de distribuciónes exponencial y potencial'
+    WRITE (5,*) 'x1      exp(x1)      norm(x1)'
+  END IF
+
+  
   
   ! Generamos la semilla prinipal
   semilla = 23052020*(497041*rank)
@@ -94,9 +100,7 @@ PROGRAM distros
     
     ! Guardamos todos los resultados en la variable
     IF (rank==0) THEN
-      datos_par(1,i) = uni1
-      datos_par(2,i) = exp1
-      datos_par(3,i) = nor1
+      WRITE (5,*) uni1, exp1, nor1
     ELSE
       uni2(i) = uni1
       exp2(i) = exp1
@@ -116,7 +120,7 @@ PROGRAM distros
     DEALLOCATE(uni2,exp2,nor2)
 
   ELSE
-    j = n1
+
     DO emisor = 1, (size-1)
       DEALLOCATE(uni2,exp2,nor2)
       n1 = 0
@@ -125,12 +129,8 @@ PROGRAM distros
       CALL MPI_RECV(uni2(1),n1,Mpi_real,emisor,2,MPI_COMM_WORLD,status, err)
       CALL MPI_RECV(exp2(1),n1,Mpi_real,emisor,3,MPI_COMM_WORLD,status, err)
       CALL MPI_RECV(nor2(1),n1,Mpi_real,emisor,4,MPI_COMM_WORLD,status, err)
-      DO i=1, n1
-        j=j+1       
-        datos_par(1,j) = uni2(i)
-        datos_par(2,j) = exp2(i)
-        datos_par(3,j) = nor2(i)
-        
+      DO i=1, n1    
+        WRITE (5,*) uni2(i), exp2(i), nor2(i)
       END DO
      
     END DO
@@ -139,18 +139,10 @@ PROGRAM distros
   END IF
 
   IF (rank==0) THEN
-    ! Abrimos archivos donde se guardaran los datos
-    OPEN (5, file = 'ditribuciones_par.dat')
-    WRITE (5,*) '# Resultados de distribuciónes exponencial y potencial'
-    WRITE (5,*) 'x1      exp(x1)      norm(x1)'
-    DO i=1, n
-      WRITE (5,*) datos_par(1,i),datos_par(2,i),datos_par(3,i)
-    END DO
-  
     PRINT *, 'Terminado'
     CLOSE(5)
   END IF
-  DEALLOCATE(datos_par)
+  
   CALL MPI_Finalize(err)
   IF (err.NE.0) STOP 'MPI_Init error'
 ENDPROGRAM distros

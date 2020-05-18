@@ -25,7 +25,7 @@ PROGRAM distros
   INTEGER, DIMENSION(33) :: semilla
   
   ! Determinamos la cantida de numeros que queremos generar
-  n = 50000
+  n = 1000
   
   ! iniciamos variables auxiliares
   delta = 3
