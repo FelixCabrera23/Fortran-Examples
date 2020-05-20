@@ -28,12 +28,12 @@ PROGRAM Gamma1
   WRITE (5,*) '#Resultados de la función Gamma'
   WRITE (5,*) ' z    G(z)aprox    G(z)real    Error% '
   
-  Z = 5.0   ! 35 es el limite de la función Gamma
+  Z = 50.0   ! 35 es el limite de la función Gamma
   
   ! Iniciamos algunas variables
   N = 1700 ! 1750 Es el limite del ordenador de pruebas
   
-  zi = 0.01
+  zi = -Z
   DO WHILE (zi<Z)
     ! Calculamos el factorial
     Factorial = 1
@@ -53,5 +53,6 @@ PROGRAM Gamma1
     WRITE (5,*) zi, Gz, Gzreal, Error
     zi = zi + 0.01
   END DO
+  PRINT *,'Gamma(',int(Z),')=',Gz
 CLOSE(5)
 END PROGRAM Gamma1
