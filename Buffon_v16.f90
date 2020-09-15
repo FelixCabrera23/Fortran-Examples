@@ -56,6 +56,7 @@ PROGRAM buffon
 
   ! Calculamos pi
   
+
     pi1 = (2*REAL(i))/(REAL(A))
     
     mod1 = mod(i,m)

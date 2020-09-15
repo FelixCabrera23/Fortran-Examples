@@ -8,7 +8,7 @@
 ! Codificación del texto: ASCII text
 ! Compiladores probados: GNU Fortran (Ubuntu 9.2.1-9ubuntu2) 9.2.1 2019008
 
-! Codigo de programasion en paralelo tomado de las clases de 
+! Codigo de programasion en paralelo tomado de las clases de
 ! Física computacional dictadas el primer semestre del 2020
 ! por el Dr. Giovanmi Ramires
 ! en la ECFM - USAC
@@ -24,20 +24,21 @@
 PROGRAM buffon_par
   USE Mpi
   IMPLICIT NONE
-  
+
   ! Declaramos algunas variables importatnes
-  REAL(16) :: x, ang, pi1, n, A
-  
+  REAL(16) :: x, ang, pi1, n
+  INTEGER :: A
+
   ! Variables auxiliares
   INTEGER, DIMENSION(33) :: sem
   INTEGER(16) :: i, mod1, m
   REAL (16) :: x1
-  
+
   !Variables auxiliares para Mpi
-  INTEGER :: err, rank, size, emisor, tag1, tag2
-  INTEGER(16) :: n1, res, A1, B1, B2
-  INTEGER(16),DIMENSION(1:MPI_STATUS_SIZE)::status
-  
+  INTEGER :: err, rank, size, emisor, tag1, tag2, A1, B1, B2
+  INTEGER(16) :: n1, res
+  INTEGER, DIMENSION(1:MPI_STATUS_SIZE)::status
+
   !Esta parte llama a Mpi
   ! iniciando MPI, esto habilita el entorno de trabajo
   CALL MPI_Init(err)
@@ -51,12 +52,12 @@ PROGRAM buffon_par
   CALL MPI_Comm_size(MPI_COMM_WORLD,size,err) ! dice cuántos nodos hay
   IF (err.NE.0) STOP 'MPI_Comm_size error' ! esto es programación defensiva
 
-  
-  ! Iniciamos algunas variables 
+
+  ! Iniciamos algunas variables
   sem = 12081948*(497041*rank)
-  
+
   CALL RANDOM_SEED (put = sem)
-  
+
   ! para mayor numero de agujas se recomienda la formula
   ! n = rank*10.0**9
   n = 100000000.0
@@ -65,13 +66,13 @@ PROGRAM buffon_par
   A = 1
   A1 = 0
   B1 = 0
-  
+
   n1 = INT(n/size,8)
   res = INT( MOD(n,REAL(size,16)), 8)
   m = n1/1000
-  
+
   IF (rank == 0 ) THEN
-    
+
     ! Esto es programación defensiva
     IF (n1 > 10**9) THEN
       PRINT *, 'n es muy grande, por farvor utilize un umero mas pequeño o añada mas nucleos'
@@ -80,38 +81,38 @@ PROGRAM buffon_par
       PRINT *, 'n debe ser un multiplo de size'
       STOP
     END IF
-  
+
     OPEN (1, file = 'Buffon_quad_par.dat', status = 'new')
     WRITE (1,*) '# Resultados de la simulación de la aguja de buffon'
     WRITE (1,*) 'n pi'
   END IF
-  
+
   PRINT *, 'soy', rank, 'n=',n1
 
 
   DO i= 1, n1
-    
+
     B1 = B1 + 1
     tag1 = INT(i)
     tag2 = INT(1+i)
-    
-    CALL RANDOM_NUMBER (x) 
-    
-    CALL RANDOM_NUMBER (ang)     
-      
+
+    CALL RANDOM_NUMBER (x)
+
+    CALL RANDOM_NUMBER (ang)
+
     ! Hacemos uso de los numeros
     x1 = x + SIN(ang*6.28318530718) ! punto del final de la aguja
-    
+
     IF ((x1 <= 0) .or. (x1 >=1)) THEN
       A1 = A1 + 1
     END IF
 
   ! Calculamos pi
-  
-    
-    
+
+
+
     mod1 = mod(i,m)
-        
+
     IF ((i == 1) .or. (mod1 == 0)) THEN
       IF (rank /= 0) THEN
         CALL MPI_SEND(A1,1,Mpi_int, 0, tag1, MPI_COMM_WORLD, err)
@@ -129,7 +130,7 @@ PROGRAM buffon_par
         WRITE (1,*) B2, pi1
       END IF
     END IF
-    
+
   END DO
 
   IF (rank == 0) THEN
@@ -137,4 +138,6 @@ PROGRAM buffon_par
     PRINT *,'pi =', pi1
     CLOSE (1)
   END IF
+  CALL MPI_Finalize(err)
+  IF (err.NE.0) STOP 'MPI_Init error'
 END PROGRAM buffon_par
